@@ -11,7 +11,7 @@ namespace CSharpAdvancedProgramming.Linq
 
         public void Test()
         {
-            SearchTest3();
+            ParallelLinq();
         }
 
         private void LingQuery()
@@ -210,7 +210,7 @@ namespace CSharpAdvancedProgramming.Linq
         /// <summary>
         /// 合并
         /// </summary>
-        public void SearchTest10()
+        private void SearchTest10()
         {
             var racerNames = from r in Formula1.GetChampions() where r.Country == "Italy" orderby r.Wins descending select new { Name = r.FirstName + " " + r.LastName };
 
@@ -227,7 +227,7 @@ namespace CSharpAdvancedProgramming.Linq
         /// <summary>
         /// 分区，分页
         /// </summary>
-        public void SearchTest11()
+        private void SearchTest11()
         {
             int pageSize = 5;
             int numberPages = (int)Math.Ceiling(Formula1.GetChampions().Count() / (double) pageSize);
@@ -245,6 +245,54 @@ namespace CSharpAdvancedProgramming.Linq
 
                 Console.WriteLine();
             }
+        }
+
+        /// <summary>
+        /// 转换
+        /// </summary>
+        private void SearchTest12()
+        {
+            var racers = (from r in Formula1.GetChampions() from c in r.Cars select new { Car = c, Racer = r }).ToLookup(cr => cr.Car, cr => cr.Racer);
+            if (racers.Contains("Williams"))
+            {
+                foreach (var williamsRacer in racers["Williams"])
+                {
+                    Console.WriteLine(williamsRacer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 转换
+        /// </summary>
+        private void SearchTest13()
+        {
+            var list = new System.Collections.ArrayList(Formula1.GetChampions() as System.Collections.ICollection);
+
+            var query = from r in list.Cast<Racer>() where r.Country == "USA" orderby r.Wins descending select r;
+
+            foreach (var racer in query)
+            {
+                Console.WriteLine("{0:A}", racer);
+            }
+        }
+
+        /// <summary>
+        /// 并行Linq
+        /// </summary>
+        private void ParallelLinq()
+        {
+            const int arraySize = 100000000;
+            var data = new int[arraySize];
+
+            var r = new Random();
+
+            for (int i = 0; i < arraySize; i++)
+            {
+                data[i] = r.Next(40);
+            }
+
+            var sum = (from x in data.AsParallel() where x < 20 select x).Sum();
         }
     }
 }
