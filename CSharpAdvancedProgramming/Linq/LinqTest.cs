@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CSharpAdvancedProgramming.Linq
@@ -11,7 +14,7 @@ namespace CSharpAdvancedProgramming.Linq
 
         public void Test()
         {
-            ParallelLinq();
+            TestDisplayTree();
         }
 
         private void LingQuery()
@@ -293,6 +296,145 @@ namespace CSharpAdvancedProgramming.Linq
             }
 
             var sum = (from x in data.AsParallel() where x < 20 select x).Sum();
+        }
+
+        /// <summary>
+        /// 分区器
+        /// </summary>
+        private void SearchTest14()
+        { 
+            const int arraySize = 100000000;
+            var data = new int[arraySize];
+
+            var r = new Random();
+
+            for (int i = 0; i < arraySize; i++)
+            {
+                data[i] = r.Next(40);
+            }
+
+            var sum = (from x in Partitioner.Create(data, true).AsParallel() where x < 20 select x).Sum();
+        }
+
+        /// <summary>
+        /// 取消任务
+        /// </summary>
+        private void SearchCancell()
+        {
+            const int arraySize = 100000000;
+            var data = new int[arraySize];
+
+            var r = new Random();
+
+            for (int i = 0; i < arraySize; i++)
+            {
+                data[i] = r.Next(40);
+            }
+
+            CancellationTokenSource cancell = CancellationTokenSource.CreateLinkedTokenSource();
+
+            new Thread(() => {
+                try
+                {
+                    var sum = (from x in data.AsParallel().WithCancellation(cancell.Token) where x < 80 select x).Sum();
+                    Console.WriteLine("query finished, sum is {0}", sum);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    Console.WriteLine("the operation is cancelled" + ex.Message);
+                }
+            }).Start();
+
+            Console.WriteLine("querying...");
+            Console.WriteLine("if you want cancelled, press Y or y");
+            int put = Console.Read();
+            if (put == 'y' || put == 'Y')
+            {
+                cancell.Cancel(true);
+            }
+        }
+
+        /// <summary>
+        /// 显示Lambda表达式树结构
+        /// </summary>
+        /// <param name="indent"></param>
+        /// <param name="message"></param>
+        /// <param name="expression"></param>
+        private void DisplayTree(int indent, string message, Expression expression)
+        {
+            string output = string.Format("{0} {1} ! NodeType: {2}; Expr: {3}", "".PadLeft(indent, '>'), message, expression.NodeType, expression);
+            indent++;
+
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Lambda:
+                    {
+                        Console.WriteLine(output);
+                        LambdaExpression lambdaExpr = (LambdaExpression)expression;
+                        foreach (var parameter in lambdaExpr.Parameters)
+                        {
+                            DisplayTree(indent, "Parameter", parameter);
+                        }
+                        DisplayTree(indent, "Body", lambdaExpr.Body);
+                        break;
+                    }
+                case ExpressionType.Constant:
+                    {
+                        ConstantExpression constExpr = (ConstantExpression)expression;
+                        Console.WriteLine("{0} Const Value: {1}", output, constExpr.Value);
+                        break;
+                    }
+                case ExpressionType.Parameter:
+                    {
+                        ParameterExpression paramExpr = (ParameterExpression)expression;
+                        Console.WriteLine("{0} Param Type: {1}", output, paramExpr.Type.Name);
+                        break;
+                    }
+                case ExpressionType.Equal:
+                    {
+                        break;
+                    }
+                case ExpressionType.AndAlso:
+                    {
+                        break;
+                    }
+                case ExpressionType.GreaterThan:
+                    {
+                        BinaryExpression binExpr = (BinaryExpression)expression;
+                        if (binExpr.Method != null)
+                        {
+                            Console.WriteLine("{0} Method: {1}", output, binExpr.Method.Name);
+                        }
+                        else
+                        {
+                            Console.WriteLine(output);
+                        }
+                        DisplayTree(indent, "Left", binExpr.Left);
+                        DisplayTree(indent, "Right", binExpr.Right);
+                        break;
+                    }
+                case ExpressionType.MemberAccess:
+                    {
+                        MemberExpression memberExpr = (MemberExpression)expression;
+                        Console.WriteLine("{0} Member Name: {1}, Type: {2}", output, memberExpr.Member.Name, memberExpr.Type.Name);
+                        DisplayTree(indent, "Member Expr", memberExpr.Expression);
+                        break;
+                    }
+                default:
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("{0} {1}", expression.NodeType, expression.Type.Name);
+                        break;
+                    }
+            }
+        }
+        /// <summary>
+        /// 测试
+        /// </summary>
+        private void TestDisplayTree()
+        {
+            Expression<Func<Racer, bool>> expression = r => r.Country == "Brazil" && r.Wins > 6;
+            DisplayTree(0, "Lambda", expression);
         }
     }
 }
