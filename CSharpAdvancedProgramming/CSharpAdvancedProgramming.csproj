@@ -48,6 +48,8 @@
     <Compile Include="Linq\Team.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflect\MyClass.cs" />
+    <Compile Include="Reflect\UserDefineAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
