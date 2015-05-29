@@ -1,0 +1,5 @@
+D:\workspace\vs2013\projects\CSharpAdvancedProgramming\AppDomainA\bin\Debug\AppDomainA.exe.config
+D:\workspace\vs2013\projects\CSharpAdvancedProgramming\AppDomainA\bin\Debug\AppDomainA.exe
+D:\workspace\vs2013\projects\CSharpAdvancedProgramming\AppDomainA\bin\Debug\AppDomainA.pdb
+D:\workspace\vs2013\projects\CSharpAdvancedProgramming\AppDomainA\obj\Debug\AppDomainA.exe
+D:\workspace\vs2013\projects\CSharpAdvancedProgramming\AppDomainA\obj\Debug\AppDomainA.pdb
