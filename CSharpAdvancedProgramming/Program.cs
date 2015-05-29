@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpAdvancedProgramming.Threadtest;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +11,14 @@ namespace CSharpAdvancedProgramming
     {
         static void Main(string[] args)
         {
-            Linq.LinqTest linqTest = new Linq.LinqTest();
-            linqTest.Test();
+            ThreadSync tt = new ThreadSync();
+            tt.Test();
 
+            //Console.WriteLine("CSharpAdvancedProgramming：" + AppDomain.CurrentDomain.FriendlyName);
 
+            //AppDomain domainA = AppDomain.CreateDomain("AppDomainA");
+            //domainA.ExecuteAssembly("AppDomainA.exe");
+            //AppDomain.Unload(domainA);
 
             Console.ReadKey();
         }
